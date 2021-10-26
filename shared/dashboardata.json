@@ -1,0 +1,8 @@
+[
+   {
+      "name":String,
+      "score":Integer,
+      "isDead":Boolean
+   },
+   ...
+]

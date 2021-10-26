@@ -1,0 +1,6 @@
+{
+   "job":{"target":String, "style":String},
+   "refreshAt":DateTime,
+   "killedAt":DateTime,
+   "score":Integer
+}

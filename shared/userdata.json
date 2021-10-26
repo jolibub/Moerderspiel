@@ -1,0 +1,5 @@
+{
+   "UserName":String,
+   "Password":String,
+   "Email":String
+}
