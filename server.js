@@ -30,9 +30,11 @@ app.get('/posts', authenitcateToken, (req, res) => {
 })
 
 app.get('/test', async (req, res) => {
-    await dbacc.createUser({name: 'aef', password: 'adcwd', email: 'awdawda'})
-    users = await dbacc.getUserById(2)
-    res.json(users)
+    //await dbacc.createUser({name: 'aef', password: 'adcwd', email: 'awdawda'})
+    //users = await dbacc.getUserById(2)
+    //styles = await dbacc.getKillStyleById(1)
+    await dbacc.createKillStyle('awdawdawdafafwafawf')
+    //res.json(styles)
 })
 
 let dbacc = {
@@ -51,6 +53,11 @@ let dbacc = {
         const user = await db.all('SELECT * FROM Users WHERE Id =' + Id)
         return user
     },
+    getUserByEmail: async(email) => {
+        const db = await dbPromise;
+        const user = await db.all('SELECT * FROM Users WHERE Id =\'' + email + '\'')
+        return user
+    },
     createUser: async(userData) =>{
         const db = await dbPromise;
         await db.all('INSERT INTO Users (Name, Password, Email) VALUES (' + '\'' + 
@@ -67,6 +74,12 @@ let dbacc = {
         const db = await dbPromise;
         const style = await db.all('SELECT * FROM Killstyles WHERE Id =' + Id)
         return style
+    },
+    createKillStyle: async(style) => {
+        const db = await dbPromise;
+        await db.all('INSERT INTO Killstyles (Style) VALUES (' + '\'' + 
+                                   style + '\')'
+                                 )
     }
 }
 
