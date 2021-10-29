@@ -1,0 +1,13 @@
+{
+  "events": {
+    "start" : "npm run build",
+    "restart" : "npm run build"
+  },
+  "ignore": [
+    "dist/*"
+  ],
+  "watch": [
+    "vueapp/*"
+  ],
+  "delay" : 2500
+}

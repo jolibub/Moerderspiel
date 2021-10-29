@@ -94,6 +94,8 @@ const posts = [
     }
 ]
 
+app.use(express.static('dist'))
+
 app.get('/posts', helper.authenticateToken, (req, res) => {
    res.json(posts.filter(post => post.username === req.user.name))
 })
