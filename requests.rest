@@ -4,12 +4,28 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVGltIiwia
 ###
 
 GET http://localhost:8080/test
+Content-Type: application/json
 
+{
+    "username": "wad"
+}
 ###
 
 POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-    "username": "Tim"
+    "username": "Tim",
+    "password": "123456"
+}
+
+###
+
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{
+    "username": "Tim",
+    "password": "123456",
+    "email": "tlh@tlharken.de"
 }

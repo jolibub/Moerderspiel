@@ -1,10 +1,10 @@
+
 Cases:
    Post:
       Refresh(JWT)
       Kill(JWT)
       Register(UserData)
       JWT Login(LoginData)
-      Logout(JWT)
    Get:
       IngameUserData UserMainPage(JWT)
       DashBoardData DashBoard(void)
