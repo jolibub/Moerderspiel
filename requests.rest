@@ -1,5 +1,5 @@
 GET http://localhost:8080/posts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVGltIiwiaWF0IjoxNjM1NDE4OTEyfQ.se5Mim3prS5EED3wVpBvMm1OpQWo0oukUCRMa9PWq3I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVG9iaSIsImlhdCI6MTYzNTU0MjIzM30.6EJUSV16c6l7XXtSY27TUJIEo4UX7KtsIZ8EH5F3SL8
 
 ###
 
@@ -15,7 +15,7 @@ POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-    "username": "Tim",
+    "username": "Tobi",
     "password": "123456"
 }
 
@@ -25,7 +25,7 @@ POST http://localhost:8080/register
 Content-Type: application/json
 
 {
-    "username": "fsadwef",
+    "username": "Tobi",
     "password": "123456",
-    "email": "tlaadwefh@tlharken.de"
+    "email": "gpunkt@lachsgeil.de"
 }

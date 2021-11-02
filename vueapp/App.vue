@@ -1,14 +1,15 @@
 <template>
 <div>
-  <h1>{{message}}</h1>
-  <hallo></hallo>
+  <navigation></navigation>
+  <user-page></user-page>
 </div>
 </template>
 
 <script>
-import Hallo from './Hallo.vue'
+import Navigation from './Navigation.vue'
+import UserPage from './UserPage.vue'
 export default {
-  components: { Hallo },
+  components: { UserPage, Navigation },
 data () {
   return {
     message : "Hello WOrld!"
