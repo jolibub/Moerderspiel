@@ -8,9 +8,10 @@ let db = new sqlite("./db/stuff.db")
 
 const express = require('express')
 const app = express()
-const jwt = require('jsonwebtoken')
-const { application } = require('express')
 app.use(express.json())
+app.use(express.static('dist'))
+
+const jwt = require('jsonwebtoken')
 
 let dbacc = {
     getUsers: () =>{
@@ -30,10 +31,8 @@ let dbacc = {
         return user
     },
     createUser: (userData) =>{
-        db.prepare('INSERT INTO Users (Name, Password, Email) VALUES (' + '\'' + 
-                                   userData.username + '\',' + '\'' + userData.password + '\',' + '\'' + 
-                                   userData.email + '\'' + ')'
-                                 ).run()
+        db.prepare('INSERT INTO Users (Name, Password, Email, RefreshedAt, RespawnsAt) VALUES (?, ?, ?, ?, ?)')
+            .run(userData.username, userData.password, userData.email, userData.datestring, userData.datestring)
     },
     getKillStyles: () => {
         const styles = db.prepare('SELECT * FROM Killstyles').all()
@@ -44,15 +43,22 @@ let dbacc = {
         return style
     },
     createKillStyle: (style) => {
-         db.prepare('INSERT INTO Killstyles (Style) VALUES (' + '\'' + 
-                                   style + '\')'
-                                 ).run()
+        db.prepare('INSERT INTO Killstyles (Style) VALUES (?)').run(style)
+    },
+    setUserRespawnTime: (Id, datestring) => {
+        db.prepare('UPDATE Users SET RespawnsAt = (?) WHERE Id = (?)').run(datestring, Id)
+    },
+    setUserRefreshedTime: (Id, datestring) => {
+        db.prepare('UPDATE Users SET RefreshedAt = (?) WHERE Id = (?)').run(datestring, Id)
+    },
+    getUserIds: () => {
+        const userIds = db.prepare('SELECT Id FROM Users').all()
+        return userIds
     }
 }
 
 let helper =
 {
-
     authenticateToken: (req, res, next) => {
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader.split(' ')[1]
@@ -77,47 +83,86 @@ let helper =
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
     },
-    validateUsername:(name) => {
+    validateUsername: (name) => {
         return /^[a-zA-Z ]+$/.test(name);
-    }
+    },
+    isDead: (id) => {
+        const dbuser = helper.getUserById(id)
+        const respawnTime = new Date(dbuser.RespawnsAt).getTime()
+        return respawnTime <= Date.now()
+    },
+    kill: (id) => {
+        if (isDead(id))
+            throw 'Subject is already dead'
 
+        let date = new Date()
+        date.setHours(date.getHours() + 2)
+
+        dbacc.setUserRespawnTime(id, date.toString())
+    },
+    isRefreshing: (id) => {
+        const dbuser = helper.getUserById(id)
+        const refreshTime = new Date(dbuser.RefreshedAt).getTime()
+        return refreshTime <= Date.now()
+    },
+    refresh: (id) => {
+        if (isRefreshing(id))
+            throw 'User is already refreshing'
+
+        let date = new Date()
+        date.setHours(date.getHours() + 2)
+
+        dbacc.setUserRefreshedTime(id, date.toString())
+    },
+    setNewTarget: (id) => {
+
+    }
 }
 
-const posts = [
-    {
-        username:"Kyle",
-        title:'Post 1'
-    },
-    {
-        username:"Tim",
-        title:'Post 2'
-    }
-]
+app.get('/dashboarddata', (req, res) => {
+    const users = dbacc.getUsers()
+    scoreboarddata = []
 
-app.use(express.static('dist'))
-
-app.get('/posts', helper.authenticateToken, (req, res) => {
-   res.json(posts.filter(post => post.username === req.user.name))
+    users.forEach( user => {
+        scoreboarddata.push({name: user.Name, kills: user.Kills, dead: helper.isDead(user.Id)})
+    })
 })
 
-app.get('/test', (req, res) => {
-    dbacc.createKillStyle('safsae');
+app.get('/ingamedata', authenticateToken, (req, res) =>{
+    const dbUser = dbacc.getUserById(req.user.id)
+
+    const data = { name: dbUser.Name
+                 , target: dbUser.Target
+                 , style: dbUser.Style
+                 , refreshedAt: dbUser.RefreshedAt
+                 , respawnsAt: dbUser.RespawnsAt
+                 , kills: dbUser.Kills
+                 }
+
+    res.json(data)
 })
 
-app.get('/dashboard', (req, res) => {
-    //Render frontend
+app.post('/refresh', helper.authenticateToken, (req, res) => {
+    if (helper.isRefreshing(req.user.id))
+        return res.json({error: "already refreshing"})
+
+    helper.refresh(req.user.id)
 })
 
-app.get('/ingamedata', (req, res) =>{
-    //Send user data
-})
+app.post('/kill', helper.authenticateToken, (req, res) => {
+    const dbuser = dbacc.getUserById(req.user.id)
+    
+    if (helper.isDead(req.user.id))
+        return res.json({error: "killer is dead"})
 
-app.get('/ingame', (req, res) => {
-    //Render frontend
-})
+    if (helper.isRefreshing(req.user.id))
+        return res.json({error: "killer is refreshing at the moment"})
+    
+    if (helper.isDead(dbuser.Target))
+        return res.json({error: "target is already dead"})
 
-app.get('/register', (req, res) => {
-    //Render frontend
+    helper.kill(dbuser.Target)
+
 })
 
 app.post('/register', (req, res) => {
@@ -137,19 +182,14 @@ app.post('/register', (req, res) => {
     if (dbacc.getUserByEmail(email) != undefined)
         return res.json({error: "email already taken"})
     
-    dbacc.createUser({username: username, email: email, password: password})
+    dbacc.createUser({username: username, email: email, password: password, datestring: Date()})
     res.sendStatus(200);
-})
-
-app.get('/login' , (req, res) => {
-    //Render frontend
 })
 
 app.post('/login', (req, res) => {
 
     const username = req.body.username
     const password = req.body.password
-    const user = { name: username }
 
     const dbuser = dbacc.getUserByName(username)
 
@@ -161,7 +201,7 @@ app.post('/login', (req, res) => {
     if (!helper.checkPassword(password, pwhash))
         return res.json({error: "username or password wrong"})
 
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+    const accessToken = jwt.sign({id: dbuser.Id}, process.env.ACCESS_TOKEN_SECRET)
     res.json({ accessToken: accessToken })
 })
 

@@ -25,7 +25,7 @@ POST http://localhost:8080/register
 Content-Type: application/json
 
 {
-    "username": "Tim",
+    "username": "fsadwef",
     "password": "123456",
-    "email": "tlh@tlharken.de"
+    "email": "tlaadwefh@tlharken.de"
 }
