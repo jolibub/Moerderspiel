@@ -60,6 +60,9 @@ let dbacc = {
     },
     setUserRefreshed: (id, val) => {
         db.prepare("UPDATE Users SET Refreshed = (?) WHERE Id = (?)").run(val, id)
+    },
+    setUserKillStyle: (id, killStyle) => {
+        db.prepare("UPDATE Users SET Style = (?) WHERE Id = (?)").run(killStyle.Style, id)
     }
 }
 
@@ -126,6 +129,7 @@ let helper =
         const users = dbacc.getUserIds().filter(Id => (Id != id) && (Id != dbuser.Target))
         const pick = users.length * Math.random() << 0
         dbacc.setUserTarget(id, users[pick])
+        dbacc.setUserKillStyle(id, getRandomKillStyle)
     },
     checkRefresh: (id) => {
         if (isRefreshing(id))
@@ -138,6 +142,11 @@ let helper =
 
         setNewTarget(id);
         dbacc.setUserRefreshed(id, 1)
+    },
+    getRandomKillStyle: () => {
+        const killStyles = dbacc.getKillStyles()
+        const pick = killStyles.length * Math.random << 0
+        return killStyles[pick]
     }
 }
 
