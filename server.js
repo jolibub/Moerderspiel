@@ -51,9 +51,15 @@ let dbacc = {
     setUserRefreshedTime: (Id, datestring) => {
         db.prepare('UPDATE Users SET RefreshedAt = (?) WHERE Id = (?)').run(datestring, Id)
     },
+    setUserTarget: (IdU, IdT) => {
+        db.prepare("UPDATE Users SET Target = (?) WHERE Id = (?)").run(IdT, IdU)
+    },
     getUserIds: () => {
         const userIds = db.prepare('SELECT Id FROM Users').all()
         return userIds
+    },
+    setUserRefreshed: (id, val) => {
+        db.prepare("UPDATE Users SET Refreshed = (?) WHERE Id = (?)").run(val, id)
     }
 }
 
@@ -113,9 +119,25 @@ let helper =
         date.setHours(date.getHours() + 2)
 
         dbacc.setUserRefreshedTime(id, date.toString())
+        dbacc.setUserRefreshed(id, 0)
     },
     setNewTarget: (id) => {
+        const dbuser = dbacc.getUserById(id);
+        const users = dbacc.getUserIds().filter(Id => (Id != id) && (Id != dbuser.Target))
+        const pick = users.length * Math.random() << 0
+        dbacc.setUserTarget(id, users[pick])
+    },
+    checkRefresh: (id) => {
+        if (isRefreshing(id))
+            return
 
+        const dbuser = dbacc.getUserById(id);
+
+        if(dbacc.Refreshed == 1)
+            return
+
+        setNewTarget(id);
+        dbacc.setUserRefreshed(id, 1)
     }
 }
 
@@ -126,6 +148,8 @@ app.get('/dashboarddata', (req, res) => {
     users.forEach( user => {
         scoreboarddata.push({name: user.Name, kills: user.Kills, dead: helper.isDead(user.Id)})
     })
+
+    res.json(scoreboarddata)
 })
 
 app.get('/ingamedata', authenticateToken, (req, res) =>{
