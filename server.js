@@ -155,17 +155,22 @@ app.get('/dashboarddata', (req, res) => {
     scoreboarddata = []
 
     users.forEach( user => {
-        scoreboarddata.push({name: user.Name, kills: user.Kills, dead: helper.isDead(user.Id)})
+        scoreboarddata.push( {
+                               name: user.Name
+                             , kills: user.Kills
+                             , dead: helper.isDead(user.Id)
+                             }
+                           )
     })
 
     res.json(scoreboarddata)
 })
 
-app.get('/ingamedata', authenticateToken, (req, res) =>{
+app.get('/ingamedata', helper.authenticateToken, (req, res) =>{
     const dbUser = dbacc.getUserById(req.user.id)
 
     const data = { name: dbUser.Name
-                 , target: dbUser.Target
+                 , target: dbacc.getUserById(dbUser.Target).Name
                  , style: dbUser.Style
                  , refreshedAt: dbUser.RefreshedAt
                  , respawnsAt: dbUser.RespawnsAt
@@ -176,10 +181,9 @@ app.get('/ingamedata', authenticateToken, (req, res) =>{
 })
 
 app.post('/refresh', helper.authenticateToken, (req, res) => {
-    if (helper.isRefreshing(req.user.id))
-        return res.json({error: "already refreshing"})
-
-    helper.refresh(req.user.id)
+    if (!helper.isRefreshing(req.user.id))
+        helper.refresh(req.user.id)
+    res.json(dbacc.getUserById(req.user.id).RefreshedAt)
 })
 
 app.post('/kill', helper.authenticateToken, (req, res) => {
@@ -195,7 +199,7 @@ app.post('/kill', helper.authenticateToken, (req, res) => {
         return res.json({error: "target is already dead"})
 
     helper.kill(dbuser.Target)
-
+    helper.setNewTarget(dbuser.Id)
 })
 
 app.post('/register', (req, res) => {
