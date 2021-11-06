@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import func from 'vue-editor-bridge'
+const axios = require('axios')
 export default {
   data () {
     return {
@@ -16,6 +18,10 @@ export default {
       score : 99
     }
   }
+}
+
+function getUserData() {
+  axios.get('')
 }
 </script>
 
