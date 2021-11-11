@@ -29,3 +29,11 @@ Content-Type: application/json
     "password": "123456",
     "email": "gpunkt@lachsgeil.de"
 }
+###
+
+GET http://localhost:8080/dashboarddata
+Content-Type: application/json
+
+{
+    
+}

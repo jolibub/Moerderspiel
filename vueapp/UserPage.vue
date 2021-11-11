@@ -7,7 +7,6 @@
 </template>
 
 <script>
-import func from 'vue-editor-bridge'
 const axios = require('axios')
 export default {
   data () {
@@ -21,7 +20,7 @@ export default {
 }
 
 function getUserData() {
-  axios.get('')
+  //axios.get('')
 }
 </script>
 
