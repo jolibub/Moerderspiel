@@ -16,11 +16,14 @@ export default {
       style : "Style",
       score : 99
     }
+  },
+  methods: {
+    getUser: function () {
+      axios.get('http://localhost:8080/ingamedata').then(res => {
+        console.log(res.data)
+      })
+    }
   }
-}
-
-function getUserData() {
-  //axios.get('')
 }
 </script>
 

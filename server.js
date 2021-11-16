@@ -86,7 +86,7 @@ let helper =
     },
     hashPassword: (pw) => {
         const salt = bcrypt.genSaltSync(saltRounds)
-        return bcrypt.hashSync(pw, salt)
+        return bcrypt.hashSync(String(pw), salt)
     },
     validateEmail: (email) => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -96,7 +96,7 @@ let helper =
         return /^[a-zA-Z ]+$/.test(name);
     },
     isDead: (id) => {
-        const dbuser = helper.getUserById(id)
+        const dbuser = dbacc.getUserById(id)
         const respawnTime = new Date(dbuser.RespawnsAt).getTime()
         return respawnTime <= Date.now()
     },
@@ -110,7 +110,7 @@ let helper =
         dbacc.setUserRespawnTime(id, date.toString())
     },
     isRefreshing: (id) => {
-        const dbuser = helper.getUserById(id)
+        const dbuser = dbacc.getUserById(id)
         const refreshTime = new Date(dbuser.RefreshedAt).getTime()
         return refreshTime <= Date.now()
     },
