@@ -19,10 +19,18 @@ export default {
   },
   methods: {
     getUser: function () {
-      axios.get('http://localhost:8080/ingamedata').then(res => {
-        console.log(res.data)
+      axios.get('http://localhost:8080/ingamedata', {
+        headers: {
+          authorization: 'Bearer ' + localStorage.accessToken
+        }
+      })
+      .then(res => {
+        console.log('Data: ' + res.data)
       })
     }
+  },
+  created() {
+    this.getUser()
   }
 }
 </script>

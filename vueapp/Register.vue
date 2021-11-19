@@ -4,7 +4,6 @@
       <input type="email" v-model="email" id="email"> 
       <input type="password" v-model="password" id="password">
       <button v-on:click="postRegister">Registrieren</button>
-    <h1>Username: {{username}}</h1>
   </div>
 </template>
 
