@@ -21,9 +21,9 @@ export default {
   methods: {
     postRegister: function () {
       axios.post('/register', {
-        username: username,
-        email: email,
-        password: password
+        username: username.value,
+        email: email.value,
+        password: password.value
       })
     }
   }
