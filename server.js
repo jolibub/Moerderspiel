@@ -55,8 +55,12 @@ let dbacc = {
         db.prepare("UPDATE Users SET Target = (?) WHERE Id = (?)").run(IdT, IdU)
     },
     getUserIds: () => {
-        const userIds = db.prepare('SELECT Id FROM Users').all()
-        return userIds
+        let userIds = db.prepare('SELECT Id FROM Users').all()
+        let temp = []
+        userIds.forEach(id => {
+            temp.push(id.Id)
+        });
+        return temp
     },
     setUserRefreshed: (id, val) => {
         db.prepare("UPDATE Users SET Refreshed = (?) WHERE Id = (?)").run(val, id)
@@ -124,12 +128,20 @@ let helper =
         dbacc.setUserRefreshedTime(id, date.toString())
         dbacc.setUserRefreshed(id, 0)
     },
+    getRandomKillStyle: () => {
+        const killStyles = dbacc.getKillStyles()
+        console.log(killStyles.length)
+        const pick = killStyles.length * Math.random() << 0
+        console.log(pick)
+        return killStyles[pick]
+    },
     setNewTarget: (id) => {
         const dbuser = dbacc.getUserById(id);
         const users = dbacc.getUserIds().filter(Id => (Id != id) && (Id != dbuser.Target))
         const pick = users.length * Math.random() << 0
+        console.log(users)
         dbacc.setUserTarget(id, users[pick])
-        dbacc.setUserKillStyle(id, getRandomKillStyle)
+        dbacc.setUserKillStyle(id, helper.getRandomKillStyle())
     },
     checkRefresh: (id) => {
         if (isRefreshing(id))
@@ -142,11 +154,6 @@ let helper =
 
         setNewTarget(id);
         dbacc.setUserRefreshed(id, 1)
-    },
-    getRandomKillStyle: () => {
-        const killStyles = dbacc.getKillStyles()
-        const pick = killStyles.length * Math.random << 0
-        return killStyles[pick]
     }
 }
 
@@ -241,6 +248,20 @@ app.post('/login', (req, res) => {
     const accessToken = jwt.sign({id: dbuser.Id}, process.env.ACCESS_TOKEN_SECRET)
     res.json({ accessToken: accessToken })
 })
+
+app.post('/test', (req, res) => {
+    let eineVariable = dbacc.getUserIds()
+
+    eineVariable.forEach(element => {
+        console.log(element)
+        helper.setNewTarget(element)
+    });
+})
+// post restart
+
+// post start
+
+// post stop
 
 const setup = () => {
     app.listen(8080)
