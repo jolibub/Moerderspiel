@@ -102,7 +102,7 @@ let helper =
     isDead: (id) => {
         const dbuser = dbacc.getUserById(id)
         const respawnTime = new Date(dbuser.RespawnsAt).getTime()
-        return respawnTime <= Date.now()
+        return respawnTime >= Date.now()
     },
     kill: (id) => {
         if (isDead(id))

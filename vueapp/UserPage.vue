@@ -26,6 +26,10 @@ export default {
       })
       .then(res => {
         console.log('Data: ' + res.data)
+        this.username = res.data.name
+        this.target = res.data.target
+        this.style = res.data.style
+        this.score = res.data.kills
       })
     }
   },
