@@ -1,16 +1,22 @@
 <template>
   <ul>
-    <li><a href="">meh</a></li>
-    <li><a href="">meh</a></li>
-    <li><a href="">meh</a></li>
-    <li><a href="">meh</a></li>
-    <li><a href="">meh</a></li>
-    <li><a href="">meh</a></li>
+    <li><a href="">Mörderspiel und so</a></li>
+    <li class="right"><a href="" v-on:click="logOut">Ausloggen</a></li> <!-- v-if="loggedIn" -->
   </ul>
 </template>
 
 <script>
 export default {
+
+  data() {
+    return {
+    }
+  },
+  methods: {
+    logOut: function () {
+      localStorage.removeItem('accessToken')
+    }
+  }
 
 }
 </script>
@@ -39,5 +45,9 @@ li a {
 /* Change the link color to #111 (black) on hover */
 li a:hover {
   background-color: #111;
+}
+
+.right {
+  float: right;
 }
 </style>
