@@ -3,9 +3,6 @@ require('dotenv').config()
 const bcrypt = require("bcrypt")
 const saltRounds = 10
 
-const sqlite = require('better-sqlite3')
-let db = new sqlite("./db/stuff.db")
-
 const express = require('express')
 const app = express()
 app.use(express.json())
@@ -13,62 +10,9 @@ app.use(express.static('dist'))
 
 const jwt = require('jsonwebtoken')
 
-let dbacc = {
-    getUsers: () =>{
-        const users = db.prepare('SELECT * FROM Users').all()
-        return users
-    },
-    getUserByName: (name) => {
-        const user = db.prepare('SELECT * FROM Users WHERE Name = ?').get(name)
-        return user
-    },
-    getUserById: (Id) => {
-        const user = db.prepare('SELECT * FROM Users WHERE Id = ?').get(Id)
-        return user
-    },
-    getUserByEmail: (email) => {
-        const user = db.prepare('SELECT * FROM Users WHERE Id = ?').get(email)
-        return user
-    },
-    createUser: (userData) =>{
-        db.prepare('INSERT INTO Users (Name, Password, Email, RefreshedAt, RespawnsAt) VALUES (?, ?, ?, ?, ?)')
-            .run(userData.username, userData.password, userData.email, userData.datestring, userData.datestring)
-    },
-    getKillStyles: () => {
-        const styles = db.prepare('SELECT * FROM Killstyles').all()
-        return styles
-    },
-    getKillStyleById: (Id) => {
-        const style = db.prepare('SELECT * FROM Killstyles WHERE Id =').get(Id)
-        return style
-    },
-    createKillStyle: (style) => {
-        db.prepare('INSERT INTO Killstyles (Style) VALUES (?)').run(style)
-    },
-    setUserRespawnTime: (Id, datestring) => {
-        db.prepare('UPDATE Users SET RespawnsAt = (?) WHERE Id = (?)').run(datestring, Id)
-    },
-    setUserRefreshedTime: (Id, datestring) => {
-        db.prepare('UPDATE Users SET RefreshedAt = (?) WHERE Id = (?)').run(datestring, Id)
-    },
-    setUserTarget: (IdU, IdT) => {
-        db.prepare("UPDATE Users SET Target = (?) WHERE Id = (?)").run(IdT, IdU)
-    },
-    getUserIds: () => {
-        let userIds = db.prepare('SELECT Id FROM Users').all()
-        let temp = []
-        userIds.forEach(id => {
-            temp.push(id.Id)
-        });
-        return temp
-    },
-    setUserRefreshed: (id, val) => {
-        db.prepare("UPDATE Users SET Refreshed = (?) WHERE Id = (?)").run(val, id)
-    },
-    setUserKillStyle: (id, killStyle) => {
-        db.prepare("UPDATE Users SET Style = (?) WHERE Id = (?)").run(killStyle.Style, id)
-    }
-}
+import {loadDB, createDBUser, getAllDBUsers, getDBUserById, updateDBUsers, updateDBUser, getDBUserByName, getDBUserByEmail, getDBKillStyles} from './dbacces.js'
+
+let gamestarted = true
 
 let helper =
 {
@@ -99,73 +43,71 @@ let helper =
     validateUsername: (name) => {
         return /^[a-zA-Z ]+$/.test(name);
     },
-    isDead: (id) => {
-        const dbuser = dbacc.getUserById(id)
+    isDead: (dbuser) => {
         const respawnTime = new Date(dbuser.RespawnsAt).getTime()
         return respawnTime >= Date.now()
     },
     kill: (id) => {
-        if (isDead(id))
+        dbuser = getDBUserById(id)
+
+        if (isDead(dbuser))
             throw 'Subject is already dead'
 
         let date = new Date()
         date.setHours(date.getHours() + 2)
 
-        dbacc.setUserRespawnTime(id, date.toString())
+        dbuser.respawnTime = date.toString()
+        updateDBUser(dbuser)
     },
-    isRefreshing: (id) => {
-        const dbuser = dbacc.getUserById(id)
+    isRefreshing: (dbuser) => {
         const refreshTime = new Date(dbuser.RefreshedAt).getTime()
         return refreshTime <= Date.now()
     },
-    refresh: (id) => {
-        if (isRefreshing(id))
+    refresh: (dbuser) => {
+        if (isRefreshing(dbuser))
             throw 'User is already refreshing'
 
         let date = new Date()
         date.setHours(date.getHours() + 2)
 
-        dbacc.setUserRefreshedTime(id, date.toString())
-        dbacc.setUserRefreshed(id, 0)
+        dbuser.refreshedAt(date.toString())
+        dbuser.Refreshed = 0
+        updateDBUser(dbuser)
     },
     getRandomKillStyle: () => {
-        const killStyles = dbacc.getKillStyles()
-        console.log(killStyles.length)
+        const killStyles = getDBKillStyles()
         const pick = killStyles.length * Math.random() << 0
-        console.log(pick)
         return killStyles[pick]
     },
-    setNewTarget: (id) => {
-        const dbuser = dbacc.getUserById(id);
-        const users = dbacc.getUserIds().filter(Id => (Id != id) && (Id != dbuser.Target))
+    setNewTarget: (dbuser) => {
+        const users = getAllDBUsers().filter(user => (user.Id != dbuser.Id) && (dbuser.Target != user.Id))
         const pick = users.length * Math.random() << 0
-        console.log(users)
-        dbacc.setUserTarget(id, users[pick])
-        dbacc.setUserKillStyle(id, helper.getRandomKillStyle())
+        dbuser.Target = users[pick]
+        dbuser.Style = helper.getRandomKillStyle()
+        updateDBUser(dbuser)
     },
-    checkRefresh: (id) => {
-        if (isRefreshing(id))
+    checkRefresh: (dbuser) => {
+        if (isRefreshing(dbuser))
             return
 
-        const dbuser = dbacc.getUserById(id);
-
-        if(dbacc.Refreshed == 1)
+        if(dbuser.Refreshed == 1)
             return
 
-        setNewTarget(id);
-        dbacc.setUserRefreshed(id, 1)
+        setNewTarget(dbuser);
+        dbuser.Refreshed = 1
+        updateDBUser(dbuser)
     }
 }
 
 app.get('/dashboarddata', (req, res) => {
-    const users = dbacc.getUsers()
+    const users = getAllDBUsers()
     scoreboarddata = []
 
     users.forEach( user => {
         scoreboarddata.push( {
                                name: user.Name
                              , kills: user.Kills
-                             , dead: helper.isDead(user.Id)
+                             , dead: helper.isDead(user)
                              }
                            )
     })
@@ -174,39 +116,47 @@ app.get('/dashboarddata', (req, res) => {
 })
 
 app.get('/ingamedata', helper.authenticateToken, (req, res) =>{
-    const dbUser = dbacc.getUserById(req.user.id)
-
-    const data = { name: dbUser.Name
-                 , target: dbacc.getUserById(dbUser.Target).Name
-                 , style: dbUser.Style
-                 , refreshedAt: dbUser.RefreshedAt
-                 , respawnsAt: dbUser.RespawnsAt
-                 , kills: dbUser.Kills
+    const dbuser = getDBUserById(req.user.id)
+    helper.checkRefresh(dbuser)
+    const data = { name: dbuser.Name
+                 , target: getDBUserById(dbuser.Target).Name
+                 , style: dbuser.Style
+                 , refreshedAt: dbuser.RefreshedAt
+                 , respawnsAt: dbuser.RespawnsAt
+                 , kills: dbuser.Kills
                  }
 
     res.json(data)
 })
 
 app.post('/refresh', helper.authenticateToken, (req, res) => {
-    if (!helper.isRefreshing(req.user.id))
-        helper.refresh(req.user.id)
-    res.json(dbacc.getUserById(req.user.id).RefreshedAt)
+    dbuser = getDBUserById(req.user.id)
+    
+    if (!helper.isRefreshing(dbuser))
+    {
+        helper.refresh(dbuser)
+        updateDBUser(dbuser)
+    }
+    
+    res.json(dbuser.RefreshedAt)
 })
 
 app.post('/kill', helper.authenticateToken, (req, res) => {
-    const dbuser = dbacc.getUserById(req.user.id)
+    let dbuser = getDBUserById(req.user.id)
     
-    if (helper.isDead(req.user.id))
+    if (helper.isDead(dbuser))
         return res.json({error: "killer is dead"})
 
-    if (helper.isRefreshing(req.user.id))
+    if (helper.isRefreshing(dbuser))
         return res.json({error: "killer is refreshing at the moment"})
     
     if (helper.isDead(dbuser.Target))
         return res.json({error: "target is already dead"})
 
     helper.kill(dbuser.Target)
-    helper.setNewTarget(dbuser.Id)
+    dbuser.Kills += 1
+    helper.setNewTarget(dbuser)
+    updateDBUser(dbuser)
 })
 
 app.post('/register', (req, res) => {
@@ -220,13 +170,13 @@ app.post('/register', (req, res) => {
     if (!helper.validateEmail(email))
         return res.json({error: "enter a valid email"})
 
-    if (dbacc.getUserByName(username) != undefined)
+    if (getDBUserByName(username) != undefined)
         return res.json({error: "username already taken"})
     
-    if (dbacc.getUserByEmail(email) != undefined)
+    if (getDBUserByEmail(email) != undefined)
         return res.json({error: "email already taken"})
     
-    dbacc.createUser({username: username, email: email, password: password, datestring: Date()})
+    createDBUser(username, password, email)
     res.sendStatus(200);
 })
 
@@ -235,7 +185,7 @@ app.post('/login', (req, res) => {
     const username = req.body.username
     const password = req.body.password
 
-    const dbuser = dbacc.getUserByName(username)
+    const dbuser = getDBUserByName(username)
 
     if (dbuser == undefined)
         return res.json({error: "this user doesnt exist"})
@@ -249,21 +199,17 @@ app.post('/login', (req, res) => {
     res.json({ accessToken: accessToken })
 })
 
-app.post('/test', (req, res) => {
-    let eineVariable = dbacc.getUserIds()
-
-    eineVariable.forEach(element => {
-        console.log(element)
-        helper.setNewTarget(element)
-    });
-})
 // post restart
 
-// post start
+app.post('/start', (req, res) => {
+    if (gamestarted)
+        return res.json({error: "the game already started"})
+})
 
 // post stop
 
 const setup = () => {
+    loadDB('./db/stuff.db')
     app.listen(8080)
 }
 
