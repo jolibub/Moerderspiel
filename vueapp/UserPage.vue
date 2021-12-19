@@ -1,11 +1,16 @@
 <template>
   <div class="center">
-    <h1>{{target}}</h1>
-    <h2>{{style}}</h2>
-    <p>{{username}} : {{score}}</p>
-    <div class="buttons">
-      <button v-on:click="postKill">Kill</button>
-      <button v-on:click="postRefresh">Refresh</button>
+    <div v-if = "new Date(refreshedAt) <= new Date()">
+      <h1>{{target}}</h1>
+      <h2>{{style}}</h2>
+    </div>
+    <div v-else>
+      Dein naechstes Ziel wird um {{new Date(refreshedAt).getHours()}}:{{new Date(refreshedAt).getMinutes()}} angezeigt. 
+    </div>
+      <p>{{username}} : {{score}}</p>
+    <div class="buttons"> 
+      <button v-on:click="postKill" :disabled = "new Date(refreshedAt) >= new Date()">Kill</button>
+      <button v-on:click="postRefresh" :disabled = "new Date(refreshedAt) >= new Date()">Refresh</button>
     </div>
   </div>
 </template>
@@ -18,7 +23,8 @@ export default {
       username : "Username",
       target : "Ziel",
       style : "Style",
-      score : 99
+      score : 99,
+      refreshedAt : new Date()
     }
   },
   methods: {
@@ -33,14 +39,23 @@ export default {
         this.target = res.data.target
         this.style = res.data.style
         this.score = res.data.kills
+        this.refreshedAt = res.data.refreshedAt
       })
     },
     postKill: function () {
+      if (!window.confirm("Echt jetzt?"))
+        return;
       axios.post('/kill', {},
       {
         headers: {
           authorization: 'Bearer ' + localStorage.accessToken
         }
+      }).then(res => {
+        this.username = res.data.name
+        this.target = res.data.target
+        this.style = res.data.style
+        this.score = res.data.kills
+        this.refreshedAt = res.data.refreshedAt
       })
     },
     postRefresh: function () {
@@ -49,6 +64,12 @@ export default {
         headers: {
           authorization: 'Bearer ' + localStorage.accessToken
         }
+      }).then(res => {
+        this.username = res.data.name
+        this.target = res.data.target
+        this.style = res.data.style
+        this.score = res.data.kills
+        this.refreshedAt = res.data.refreshedAt
       })
     }
   },
