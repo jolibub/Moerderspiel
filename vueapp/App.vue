@@ -1,19 +1,38 @@
 <template>
 <div>
-  <h1>{{message}}</h1>
-  <hallo></hallo>
+  <navigation></navigation>
+  <user-page v-if="loggedIn"></user-page>
+  <register v-if="!loggedIn"></register>
+  <dasboard v-if="!loggedIn"></dasboard>
 </div>
 </template>
 
 <script>
-import Hallo from './Hallo.vue'
+import Dasboard from './dasboard.vue'
+import Navigation from './Navigation.vue'
+import Register from './Register.vue'
+import UserPage from './UserPage.vue'
 export default {
-  components: { Hallo },
-data () {
-  return {
-    message : "Hello WOrld!"
+  components: { UserPage, Register, Dasboard, Navigation },
+  data () {
+    return {
+      loggedIn: false
+    }
+  },
+  created() {
+    if(localStorage.accessToken != undefined) {
+      this.loggedIn = true
+    } else {
+      this.loggedIn = false
+    }
+  },
+  beforeUpdate() {
+    if(localStorage.accessToken != undefined) {
+      this.loggedIn = true
+    } else {
+      this.loggedIn = false
+    }
   }
-}
 }
 </script>
 
