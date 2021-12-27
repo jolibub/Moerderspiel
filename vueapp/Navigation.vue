@@ -1,11 +1,13 @@
 <template>
   <ul>
     <li><a href="">Mörderspiel und so</a></li>
-    <li class="right"><a href="" v-on:click="logOut">Ausloggen</a></li> <!-- v-if="loggedIn" -->
+    <li class="right"><a href="" v-on:click="logOut">Ausloggen</a></li>
+    <li class="right"><a href="" v-on:click="restart">REEEEESTART</a></li> <!-- v-if="loggedIn" -->
   </ul>
 </template>
 
 <script>
+const axios = require('axios')
 export default {
 
   data() {
@@ -15,10 +17,31 @@ export default {
   methods: {
     logOut: function () {
       localStorage.removeItem('accessToken')
+    },
+    restart: function () {
+      if (!window.confirm("Echt jetzt?"))
+        return
+      if (!window.confirm("Also wirklich?"))
+        return
+      if (!window.confirm("Ganz sicher?"))
+        return
+      if (!window.confirm("Ganz ganz sicher?"))
+        return
+      if (!window.confirm("Ok du hast es getan!"))
+        return
+      if (!window.confirm("Scherz"))
+        return
+      if (!window.confirm("Bist du dir wirklich ganz sicher?"))
+        return
+      axios.get('/restart', {
+        headers: {
+          authorization: 'Bearer ' + localStorage.accessToken
+        }
+      })
     }
   }
 
-}
+} 
 </script>
 
 <style>

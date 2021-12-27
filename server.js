@@ -38,10 +38,10 @@ let helper =
     },
     validateEmail: (email) => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(String(email).toLowerCase());
+        return re.test(String(email).toLowerCase())
     },
     validateUsername: (name) => {
-        return /^[a-zA-Z ]+$/.test(name);
+        return /^[a-zA-Z ]+$/.test(name)
     },
     isDead: (dbuser) => {
         const respawnTime = new Date(dbuser.RespawnsAt).getTime()
@@ -93,17 +93,31 @@ let helper =
         if(dbuser.Refreshed == 1)
             return
 
-        helper.setNewTarget(dbuser);
+        helper.setNewTarget(dbuser)
         dbuser.Refreshed = 1
         db.updateDBUser(dbuser)
     },
     resetUser: (dbuser) => {
-        dbuser.kills = 0;
-        dbuser.respawnTime = Date.now().toString();
+        dbuser.Kills = 0
+        dbuser.RespawnTime = Date.now().toString()
 
         let tmpDt = new Date()
         tmpDt.setHours(tmpDt.getHours() - 24)
-        dbuser.refreshedAt = tmpDt.toString()
+        dbuser.RefreshedAt = tmpDt.toString()
+    },
+    login: (username,pw) => {
+        const dbuser = db.getDBUserByName(username)
+
+        if (dbuser == undefined)
+            return {error: "this user doesnt exist"}
+    
+        const pwhash = dbuser.Password
+
+        if (!helper.checkPassword(pw, pwhash))
+            return {error: "username or password wrong"}
+
+        const accessToken = jwt.sign({id: dbuser.Id}, process.env.ACCESS_TOKEN_SECRET)
+        return accessToken
     }
 }
 
@@ -202,40 +216,28 @@ app.post('/register', (req, res) => {
         return res.json({error: "email already taken"})
     
     db.createDBUser(username, password, email)
-    res.sendStatus(200);
+    res.sendStatus(200)
 })
 
 app.post('/login', (req, res) => {
-
-    const username = req.body.username
-    const password = req.body.password
-
-    const dbuser = db.getDBUserByName(username)
-
-    if (dbuser == undefined)
-        return res.json({error: "this user doesnt exist"})
-    
-    const pwhash = dbuser.Password
-
-    if (!helper.checkPassword(password, pwhash))
-        return res.json({error: "username or password wrong"})
-
-    const accessToken = jwt.sign({id: dbuser.Id}, process.env.ACCESS_TOKEN_SECRET)
-    res.json({ accessToken: accessToken })
+    res.json({ accessToken: helper.login(req.body.username, req.body.password)})
 })
 
-app.post('/restart', (req, res) => {
+app.get('/restart', helper.authenticateToken, (req, res) => {
+    const dbuser = db.getDBUserById(req.user.id)
+
+    if (!(dbuser.Name == 'Tim' || dbuser.Name == 'Tobi')) return
+
     users = db.getAllDBUsers()
 
     users.forEach(user => {
-        console.log("1")
         helper.resetUser(user)
-        console.log("2")
         helper.setNewTarget(user)
-        console.log("3")
-    });
+    })
 
     db.updateDBUsers(users)
+
+    res.sendStatus(200)
 })
 
 const setup = () => {

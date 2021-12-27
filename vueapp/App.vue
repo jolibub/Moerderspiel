@@ -1,9 +1,11 @@
 <template>
 <div>
   <navigation></navigation>
-  <user-page v-if="loggedIn"></user-page>
-  <register v-if="!loggedIn"></register>
-  <dasboard v-if="!loggedIn"></dasboard>
+  <div class="content">
+    <user-page v-if="loggedIn"></user-page>
+    <register v-if="!loggedIn"></register>
+    <dasboard v-if="!loggedIn"></dasboard>
+  </div>
 </div>
 </template>
 
@@ -37,5 +39,8 @@ export default {
 </script>
 
 <style>
-
+.content {
+  margin: auto;
+  text-align: center;
+}
 </style>

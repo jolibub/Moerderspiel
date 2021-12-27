@@ -1,5 +1,5 @@
-GET http://localhost:8080/posts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVG9iaSIsImlhdCI6MTYzNTU0MjIzM30.6EJUSV16c6l7XXtSY27TUJIEo4UX7KtsIZ8EH5F3SL8
+GET http://localhost:8080/ingamedata
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjQwNjM0Mzk3fQ.dN1eVIua3MowQPaHZtgCtYj59nUw0H7GgHzygYEZliw
 
 ###
 

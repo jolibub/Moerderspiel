@@ -26,14 +26,14 @@ module.exports = {
         db.prepare('INSERT INTO Users (Name, Password, Email, RefreshedAt, RespawnsAt) VALUES (?, ?, ?, ?, ?)')
             .run(name, pwhash, email, defaultDate.toString(), defaultDate.toString())
         
-        return getDBUserByName(name)
+        return module.exports.getDBUserByName(name)
     },
     getAllDBUsers: function(){
         return db.prepare('SELECT * FROM Users').all();
     },
     updateDBUsers: function(userList){
         userList.forEach(user => {
-            updateDBUser(user)
+            module.exports.updateDBUser(user)
         });
     },
     updateDBUser: function(user){

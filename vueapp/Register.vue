@@ -5,7 +5,7 @@
       <label for="email">Email</label><br>
       <input type="email" v-model="email" id="email"><br>
       <label for="password">Passwort</label><br>
-      <input type="password" v-model="password" id="password"><br>
+      <input @keyup.enter="postLogin" type="password" v-model="password" id="password"><br>
       <button v-on:click="postLogin">Login</button>
       <button v-on:click="postRegister">Registrieren</button>
   </div>
@@ -28,6 +28,10 @@ export default {
         email: email.value,
         password: password.value
       })
+      .then(function (response) {
+        localStorage.accessToken = response.data.accessToken
+        location.reload()
+      })
     },
     postLogin: function() {
       axios.post('/login', {
@@ -36,6 +40,7 @@ export default {
       })
       .then(function (response) {
         localStorage.accessToken = response.data.accessToken
+        location.reload()
       })
     }
   }

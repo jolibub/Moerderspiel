@@ -5,7 +5,7 @@
       <h2>{{style}}</h2>
     </div>
     <div v-else>
-      Dein naechstes Ziel wird um {{new Date(refreshedAt).getHours()}}:{{new Date(refreshedAt).getMinutes()}} angezeigt. 
+      Dein naechstes Ziel wird um {{new Date(refreshedAt).getHours()}}:{{(new Date(refreshedAt).getMinutes() < 10 ? '0' : '') + new Date(refreshedAt).getMinutes()}} angezeigt. 
     </div>
       <p>{{username}} : {{score}}</p>
     <div class="buttons"> 
@@ -29,7 +29,7 @@ export default {
   },
   methods: {
     getUser: function () {
-      axios.get('http://localhost:8080/ingamedata', {
+      axios.get('/ingamedata', {
         headers: {
           authorization: 'Bearer ' + localStorage.accessToken
         }
@@ -44,7 +44,7 @@ export default {
     },
     postKill: function () {
       if (!window.confirm("Echt jetzt?"))
-        return;
+        return
       axios.post('/kill', {},
       {
         headers: {
@@ -59,6 +59,8 @@ export default {
       })
     },
     postRefresh: function () {
+      if (!window.confirm("Echt jetzt?"))
+        return
       axios.post('/refresh', {},
       {
         headers: {
@@ -86,7 +88,11 @@ export default {
 }
 
 .center .buttons {
-  margin-left: 50%;
-  margin-right: 50%;
+  margin-left: 30%;
+  margin-right: 30%;
+}
+
+.center .buttons button {
+  padding: 2vh;
 }
 </style>
