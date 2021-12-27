@@ -2,7 +2,6 @@
   <ul>
     <li><a href="">Mörderspiel und so</a></li>
     <li class="right"><a href="" v-on:click="logOut">Ausloggen</a></li>
-    <li class="right"><a href="" v-on:click="restart">REEEEESTART</a></li> <!-- v-if="loggedIn" -->
   </ul>
 </template>
 

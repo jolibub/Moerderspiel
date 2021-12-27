@@ -1,5 +1,5 @@
-GET http://localhost:8080/ingamedata
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjQwNjM0Mzk3fQ.dN1eVIua3MowQPaHZtgCtYj59nUw0H7GgHzygYEZliw
+GET http://localhost:8080/restart
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTY0MDY0MzY3NX0.P9uPRbpZrb6nB1SuTFLaBVUhzrnGzE6Vt-bQJFvg0vc
 
 ###
 
@@ -15,8 +15,8 @@ POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-    "username": "Tobi",
-    "password": "123456"
+    "username": "Tim",
+    "password": "tim"
 }
 
 ###
@@ -40,4 +40,4 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:8080/restart
+GET http://localhost:8080/restart

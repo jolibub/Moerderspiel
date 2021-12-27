@@ -49,14 +49,13 @@ let helper =
     },
     kill: (id) => {
         dbuser = db.getDBUserById(id)
-
         if (helper.isDead(dbuser))
             throw 'Subject is already dead'
 
         let date = new Date()
         date.setHours(date.getHours() + 2)
 
-        dbuser.respawnTime = date.toString()
+        dbuser.RespawnsAt = date.toString()
         db.updateDBUser(dbuser)
     },
     isRefreshing: (dbuser) => {
@@ -180,7 +179,7 @@ app.post('/kill', helper.authenticateToken, (req, res) => {
     if (helper.isRefreshing(dbuser))
         return res.json({error: "killer is refreshing at the moment"})
     
-    if (helper.isDead(dbuser.Target))
+    if (helper.isDead(db.getDBUserById(dbuser.Target)))
         return res.json({error: "target is already dead"})
 
     helper.kill(dbuser.Target)
