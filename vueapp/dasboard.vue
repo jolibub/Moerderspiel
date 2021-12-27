@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     getDashboard: function () {
-      axios.get('http://localhost:8080/dashboarddata').then(res => {
+      axios.get('/dashboarddata').then(res => {
         this.dashboarddata = res.data
         console.log(this.dashboarddata)
       })
