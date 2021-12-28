@@ -1,5 +1,14 @@
-GET http://localhost:8080/restart
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTY0MDY0MzY3NX0.P9uPRbpZrb6nB1SuTFLaBVUhzrnGzE6Vt-bQJFvg0vc
+POST http://localhost:8080/killstyle
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsImlhdCI6MTY0MDcxNjczMH0.adDiVqzhUEb92wt1JM3PB-6Rz6Zd66J4nPrUDXJZOq4
+Content-Type: application/json
+
+{
+    "style":"hallo1"
+}
+
+###
+
+GET http://localhost:8080/killstyles
 
 ###
 

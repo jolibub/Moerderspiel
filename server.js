@@ -239,9 +239,23 @@ app.get('/restart', helper.authenticateToken, (req, res) => {
     res.sendStatus(200)
 })
 
+app.post('/killstyle', helper.authenticateToken, (req, res) => {
+    const dbuser = db.getDBUserById(req.user.id)
+
+    if (!(dbuser.Name == 'Tim' || dbuser.Name == 'Tobi')) return
+    
+    db.setDBKillStyle(req.body.style)
+
+})
+
+app.get('/killstyles',  (req, res) => {
+    res.json(db.getDBKillStyles())
+
+})
+
 const setup = () => {
     db.loadDB('./db/stuff.db')
-    app.listen(8080)
+    app.listen(80)
 }
 
 setup()

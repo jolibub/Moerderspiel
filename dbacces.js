@@ -10,6 +10,10 @@ module.exports = {
     {
         return db.prepare('SELECT * FROM Killstyles').all()
     },
+    setDBKillStyle: function(style)
+    {
+        return db.prepare('insert into Killstyles (Style) values (?)').run(style)
+    },
     getDBUserById: function(id){
         return db.prepare('SELECT * FROM Users WHERE Id = (?)').get(id)
     },
